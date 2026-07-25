@@ -1,0 +1,29 @@
+# CMake
+/build/
+/Builds/
+/cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+
+# Xcode
+*.xcworkspace
+xcuserdata/
+DerivedData/
+*.xcuserstate
+
+# JUCE/plugin outputs
+*.component
+*.vst3
+*.aaxplugin
+*.appex
+
+# macOS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
