@@ -19,6 +19,18 @@ DerivedData/
 *.aaxplugin
 *.appex
 
+# Local evaluation audio and datasets
+/audio/
+/samples/
+/datasets/
+*.wav
+*.aif
+*.aiff
+
+# Local logs and temporary files
+*.log
+*.tmp
+
 # macOS
 .DS_Store
 
@@ -26,4 +38,3 @@ DerivedData/
 .idea/
 .vscode/
 *.swp
-

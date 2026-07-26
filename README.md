@@ -42,6 +42,31 @@ The prototype plan and acceptance gate are documented in [`docs/CONTEXT_PROTOTYP
 
 The repository is being initialized. Build commands will be verified on macOS before they are presented as supported.
 
+## Working with Codex and Devin
+
+This repository includes shared context so either agent can continue without
+reconstructing prior decisions:
+
+- [`AGENTS.md`](AGENTS.md): mandatory workflow and real-time DSP rules;
+- [`HANDOFF.md`](HANDOFF.md): current state, evidence and next action;
+- [`DECISIONS.md`](DECISIONS.md): confirmed scope decisions;
+- [`PROMPTS.md`](PROMPTS.md): ready-to-use prompts for starting, continuing and
+  reviewing work;
+- [`REVIEW.md`](REVIEW.md): review gates for DSP, UI and scope;
+- [`PROTOTYPE_BUILD.md`](PROTOTYPE_BUILD.md): verified build record;
+- [`PROTOTYPE_RESULTS.md`](PROTOTYPE_RESULTS.md): level-matched listening and
+  validation record.
+
+Start a coding session with:
+
+```text
+Read AGENTS.md and every file it references. Inspect the repository state and
+execute only the first genuinely pending task in docs/tasks_prototype.md.
+Verify its acceptance criteria and update HANDOFF.md before stopping.
+```
+
+Do not run Codex and Devin simultaneously against the same checkout.
+
 ## License
 
 DI Rescue is licensed under the GNU Affero General Public License v3.0. See [`LICENSE`](LICENSE).
