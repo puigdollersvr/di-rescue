@@ -108,6 +108,12 @@
 - Comando ejecutado:
   - `cmake --build build --config Debug --parallel` → `** BUILD SUCCEEDED **`.
 
+## Validación AU
+
+- Se copió `build/DIRescue_artefacts/Debug/AU/DI Rescue.component` a `~/Library/Audio/Plug-Ins/Components/`.
+- `auval -v aufx DiRs Pdrv` terminó con `AU VALIDATION SUCCEEDED`.
+- **Advertencia:** apareció `JUCE Assertion failure in juce_IIRFilter.cpp:141` durante el test de render a 192 kHz. Las pruebas a 44.1/48/96 kHz pasaron, por lo que no debería afectar el uso habitual en Logic con proyectos a 44.1/48 kHz.
+
 ## Evidencia que falta
 
 - Validación visual de P030 en un host real (colores, layout, medidores, LEDs, apertura/cierre).
