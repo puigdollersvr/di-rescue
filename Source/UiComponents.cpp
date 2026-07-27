@@ -33,7 +33,7 @@ void SegmentedMeter::paint(juce::Graphics& g)
     for (int i = 0; i < numSegments; ++i)
     {
         const float segY = yTop + static_cast<float>(i) * segHeight;
-        const float thresholdDb = juce::jmap(static_cast<float>(i), 0.0f, static_cast<float>(numSegments - 1), -60.0f, 0.0f);
+        const float thresholdDb = juce::jmap(static_cast<float>(i), 0.0f, static_cast<float>(numSegments - 1), 0.0f, -60.0f);
         const bool isOn = displayedDb >= thresholdDb;
 
         juce::Rectangle<float> seg(x + 1.0f, segY + gap / 2.0f, width - 2.0f, segHeight - gap);

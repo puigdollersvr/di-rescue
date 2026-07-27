@@ -20,8 +20,13 @@ DIRescueAudioProcessorEditor::DIRescueAudioProcessorEditor(
     addAndMakeVisible(instrumentSelector);
 
     restoreSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    restoreSlider.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+    restoreSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 24);
     restoreSlider.setRange(0.0, 100.0, 0.1);
+    restoreSlider.setNumDecimalPlacesToDisplay(0);
+    restoreSlider.setTextValueSuffix(" %");
+    restoreSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colour(0xffd8d1c4));
+    restoreSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::transparentBlack);
+    restoreSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     restoreSlider.setLookAndFeel(&diLookAndFeel);
     addAndMakeVisible(restoreSlider);
 

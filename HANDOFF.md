@@ -105,7 +105,10 @@
   - Corregida la escala del parámetro `restore`: `getRawParameterValue` devuelve un valor normalizado `0..1` y `ChannelDsp::setTargets` espera `0..100`; ahora se multiplica por `100.0f`.
 - `Source/PluginEditor.cpp`:
   - Añadido `restoreSlider.setRange(0.0, 100.0, 0.1)` para que `SliderAttachment` mapee todo el rango del parámetro `restore`.
-- Comando ejecutado:
+  - Añadido indicador numérico `0 %`–`100 %` bajo el knob `RESTORE` con `TextBoxBelow`.
+- `Source/UiComponents.cpp`:
+  - Invertido el mapeo de `thresholdDb` en `SegmentedMeter::paint` (`0.0f` arriba, `-60.0f` abajo) para que los medidores llenen de abajo hacia arriba.
+- Comandos ejecutados:
   - `cmake --build build --config Debug --parallel` → `** BUILD SUCCEEDED **`.
 
 ## Validación AU
@@ -121,11 +124,36 @@
 - No se ha verificado Release build (P040).
 - P040–P042 aún no están verificados.
 
+## Corrección de bypass e intensidad DSP — 2026-07-27
+
+- Problema reportado: con altavoces de portátil no se percibía diferencia al
+  conmutar el bypass.
+- Causa: la mezcla de bypass usaba la señal post-`safetyFilter` como referencia
+  `dry`, y los ganchos de ganancia de los módulos de restauración eran tan
+  bajos que el efecto resultaba inaudible en monitores modestos.
+- Cambios en `Source/DspCore.h`:
+  - `maxSpectralDb` de `2.5` a `4.5` dB.
+  - `maxTransientDb` de `0.8` a `2.0` dB.
+  - `levelCompDb` de `1.8` a `3.0` dB para mantener el nivel general.
+  - `branchDrive` de `4.0` a `6.0`.
+  - `harmonicLevel` de `0.04` a `0.08`.
+- Cambios en `Source/DspCore.cpp`:
+  - La fórmula de `correctionTarget` pasa a `1.0f - balance * 2.0f`,
+    haciendo que la restauración espectral sea más sensible a DIs apagadas.
+  - La mezcla de bypass ahora es `x = in + (x - in) * bypassMix`, es decir,
+    la señal cruda de entrada vs el procesado completo, con el mismo crossfade
+    de 5 ms para evitar clicks.
+- Build Debug: `cmake --build build --config Debug --parallel` → **BUILD SUCCEEDED**.
+- Se copió `build/DIRescue_artefacts/Debug/AU/DI Rescue.component` a
+  `~/Library/Audio/Plug-Ins/Components/`.
+- Se reinició `AudioComponentRegistrar` para invalidar la caché de Audio Units.
+- Pruebas pendientes: escucha A/B con DI real en Logic a 44.1/48 kHz y `auval`.
+
 ## Próxima acción
 
-Continuar con **P040 — Validar build y estabilidad mínima**: compilar Release,
-ejecutar `auval`, probar 44.1/48 kHz y verificar que el DSP no produce clicks,
-NaN ni clipping en una DI real.
+Reconstruir/instalar el `.component` en `~/Library/Audio/Plug-Ins/Components/`,
+reiniciar `AudioComponentRegistrar` y probar el A/B en Logic con una DI real a
+44.1/48 kHz. Luego actualizar `PROTOTYPE_RESULTS.md`.
 
 ## Cambios sin commit
 

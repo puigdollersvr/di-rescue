@@ -75,11 +75,11 @@ private:
 
     float inputPeak = 0.0f, outputPeak = 0.0f;
 
-    static constexpr float maxSpectralDb = 2.5f;
-    static constexpr float maxTransientDb = 0.8f;
-    static constexpr float levelCompDb = 1.8f;
-    static constexpr float branchDrive = 4.0f;
-    static constexpr float harmonicLevel = 0.04f;
+    static constexpr float maxSpectralDb = 4.5f;
+    static constexpr float maxTransientDb = 2.0f;
+    static constexpr float levelCompDb = 3.0f;
+    static constexpr float branchDrive = 6.0f;
+    static constexpr float harmonicLevel = 0.08f;
 };
 
 } // namespace rescue_dsp

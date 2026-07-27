@@ -220,8 +220,8 @@ float ChannelDsp::processSample(float in) noexcept
         const float high = presEnv + topEnv;
         const float total = bodyEnv + high + 1.0e-10f;
         const float balance = high / total;
-        // balance > ~0.33 is bright; < ~0.15 is dull
-        correctionTarget = 1.0f - balance * 3.0f;
+        // balance > 0.5 is bright enough; below that start restoring
+        correctionTarget = 1.0f - balance * 2.0f;
         correctionTarget = std::clamp(correctionTarget, 0.0f, 1.0f);
     }
 
@@ -255,8 +255,8 @@ float ChannelDsp::processSample(float in) noexcept
     const float compDb = -levelCompDb * restoreNorm;
     x *= juce::Decibels::decibelsToGain(compDb);
 
-    // 7. Bypass crossfade
-    x = dry + (x - dry) * bypassMix;
+    // 7. Bypass crossfade (dry = raw input, processed = x)
+    x = in + (x - in) * bypassMix;
 
     x = safeValue(x);
     outputPeak = std::max(outputPeak, std::abs(x));
