@@ -42,6 +42,8 @@ target_sources(DIRescue
         Source/PluginEditor.h
         Source/PluginProcessor.cpp
         Source/PluginProcessor.h
+        Source/UiComponents.cpp
+        Source/UiComponents.h
 )
 
 target_compile_definitions(DIRescue

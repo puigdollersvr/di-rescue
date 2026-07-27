@@ -7,6 +7,7 @@ DIRescueAudioProcessor::DIRescueAudioProcessor()
                          .withOutput("Output", juce::AudioChannelSet::mono(), true)),
       parameters(*this, nullptr, "PARAMETERS", createParameterLayout())
 {
+    setLatencySamples(0);
 }
 
 void DIRescueAudioProcessor::prepareToPlay(double sampleRate, int)
@@ -64,7 +65,7 @@ void DIRescueAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     jassert(rawInstrument != nullptr && rawRestore != nullptr && rawBypass != nullptr);
 
     const int instrumentIndex = (rawInstrument != nullptr) ? static_cast<int>(rawInstrument->load()) : 0;
-    const float restore       = (rawRestore != nullptr)    ? rawRestore->load() : 0.0f;
+    const float restore       = (rawRestore != nullptr)    ? rawRestore->load() * 100.0f : 0.0f; // raw is 0..1, DspCore expects 0..100
     const bool bypass         = (rawBypass != nullptr)     ? (rawBypass->load() > 0.5f) : false;
 
     for (auto channel = 0; channel < getTotalNumInputChannels(); ++channel)

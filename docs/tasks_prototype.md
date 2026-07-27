@@ -231,7 +231,7 @@
 
 ## Fase P3 — Interfaz reutilizable
 
-### [ ] P030 — Implementar la UI aprobada y los medidores
+### [x] P030 — Implementar la UI aprobada y los medidores
 
 **Estimación:** 60–90 min.
 

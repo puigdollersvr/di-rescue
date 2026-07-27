@@ -80,11 +80,40 @@
 - `CMakeLists.txt`: eliminado `Source/DspCore.h` de `target_sources`.
 - `cmake --build build --config Debug --parallel` terminó correctamente (`** BUILD SUCCEEDED **`) tras las correcciones.
 
+## Fase P3 — Estado
+
+- **P030 — Implementar la UI aprobada y los medidores:** implementado y compilado.
+  - Se creó `Source/UiComponents.h/cpp` con componentes desacoplados del DSP y reutilizables:
+    - `ui::SegmentedMeter` para medidores IN/OUT con rango aproximado de −60 a 0 dBFS y caída suavizada.
+    - `ui::ClipLed` para LEDs de clipping con retención aproximada de un segundo.
+    - `ui::InstrumentSelector` para la selección Guitar/Bass.
+    - `ui::DiRescueLookAndFeel` con rotary y toggle estilizados según la paleta.
+  - Se reescribió `Source/PluginEditor.h/cpp`:
+    - Layout fijo ~900 × 600 px con cabecera, knob central `RESTORE`, selector izquierdo, medidores IN/OUT con LEDs, bypass derecho y pie `PLACE BEFORE NAM` / `ZERO LATENCY`.
+    - Timer de UI a ~30 Hz que lee picos atómicos y refresca medidores/LEDs sin tomar locks en el hilo de audio.
+    - Selector de instrumento reactivo con el parámetro `instrument` del APVTS.
+  - `Source/PluginProcessor.cpp` fija `setLatencySamples(0)`, permitiendo mostrar `ZERO LATENCY`.
+  - `CMakeLists.txt` se actualizó con los nuevos archivos.
+  - Comandos ejecutados:
+    - `cmake -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64` → OK.
+    - `cmake --build build --config Debug --parallel` → `** BUILD SUCCEEDED **`.
+  - **Pendiente de validación:** captura/verificación visual real en un host (mockup, medidores, LEDs, reflejo de parámetros y apertura/cierre sin clicks).
+
+## Correcciones P030 tras revisión
+
+- `Source/PluginProcessor.cpp`:
+  - Corregida la escala del parámetro `restore`: `getRawParameterValue` devuelve un valor normalizado `0..1` y `ChannelDsp::setTargets` espera `0..100`; ahora se multiplica por `100.0f`.
+- `Source/PluginEditor.cpp`:
+  - Añadido `restoreSlider.setRange(0.0, 100.0, 0.1)` para que `SliderAttachment` mapee todo el rango del parámetro `restore`.
+- Comando ejecutado:
+  - `cmake --build build --config Debug --parallel` → `** BUILD SUCCEEDED **`.
+
 ## Evidencia que falta
 
+- Validación visual de P030 en un host real (colores, layout, medidores, LEDs, apertura/cierre).
 - No consta todavía una carga en Logic ni una prueba sonora real.
 - No se ha verificado Release build (P040).
-- P030 y P040–P042 aún no están verificados.
+- P040–P042 aún no están verificados.
 
 ## Próxima acción
 
@@ -94,12 +123,12 @@ NaN ni clipping en una DI real.
 
 ## Cambios sin commit
 
-- `Source/DspCore.h` y `Source/DspCore.cpp` creados.
+- `Source/DspCore.h` y `Source/DspCore.cpp`.
+- `Source/UiComponents.h` y `Source/UiComponents.cpp` creados.
+- `Source/PluginEditor.h` y `Source/PluginEditor.cpp` modificados.
 - `Source/PluginProcessor.h` y `Source/PluginProcessor.cpp` modificados.
-- `CMakeLists.txt` actualizado con los nuevos archivos fuente.
-- `PROTOTYPE_BUILD.md` actualizado.
-- `docs/DSP_REFS.md` creado.
-- `docs/tasks_prototype.md` actualizado con tareas marcadas.
+- `CMakeLists.txt` actualizado.
+- `docs/tasks_prototype.md` actualizado.
 - `HANDOFF.md` actualizado.
 - Directorio `build/` generado (no se debe incluir en el repositorio; está en `.gitignore`).
 
