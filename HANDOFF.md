@@ -6,7 +6,8 @@
 
 - Repositorio: `puigdollersvr/di-rescue`.
 - Rama inspeccionada: `main`.
-- Commit observado: `551f7b3ad701d2cfd6925e622fd2a3b6817156ad`.
+- Commit base observado: `32b2cea359f0773867a5aafd05e0592c30761d45`.
+- Rama de esta corrección: `agent/literature-backed-dsp-corrections`.
 - El repositorio ya contiene un proyecto JUCE/CMake, código de procesador y
   editor, documentación de alcance y el mockup aprobado.
 
@@ -102,7 +103,7 @@
 ## Correcciones P030 tras revisión
 
 - `Source/PluginProcessor.cpp`:
-  - Corregida la escala del parámetro `restore`: `getRawParameterValue` devuelve un valor normalizado `0..1` y `ChannelDsp::setTargets` espera `0..100`; ahora se multiplica por `100.0f`.
+  - La explicación anterior era incorrecta: APVTS devuelve el valor denormalizado del parámetro. Como `restore` está declarado 0–100, multiplicarlo por 100 comprimía todo el DSP en el primer 1 % del control. La rama actual elimina ese factor.
 - `Source/PluginEditor.cpp`:
   - Añadido `restoreSlider.setRange(0.0, 100.0, 0.1)` para que `SliderAttachment` mapee todo el rango del parámetro `restore`.
   - Añadido indicador numérico `0 %`–`100 %` bajo el knob `RESTORE` con `TextBoxBelow`.
@@ -149,22 +150,44 @@
 - Se reinició `AudioComponentRegistrar` para invalidar la caché de Audio Units.
 - Pruebas pendientes: escucha A/B con DI real en Logic a 44.1/48 kHz y `auval`.
 
+
+## Corrección respaldada por literatura — 2026-07-27
+
+- Se añadió `docs/LITERATURE_AND_DSP.md` con fuentes primarias, inferencias,
+  fórmulas implementadas, límites de la evidencia y corpus permitidos.
+- `PluginProcessor.cpp`: corregido el rango APVTS 0–100.
+- `DspCore.h/cpp`:
+  - detectores cambiados de amplitud absoluta a potencia suavizada;
+  - relación de brillo en dB y densidad aproximada por ancho en octavas;
+  - referencias separadas y tolerantes para Guitar/Bass;
+  - zona conservadora 0–65 y zona de audición 65–100;
+  - ataque derivado de la relación de potencias rápida/lenta en dB;
+  - `tanh` normalizada, residuo no lineal y ADAA de primer orden;
+  - filtro posterior de la rama armónica;
+  - compensación máxima reducida frente a la atenuación global de −3 dB;
+  - cambio Guitar/Bass mediante crossfade temporal hacia la DI limpia antes
+    de sustituir y reiniciar el banco de filtros;
+  - frecuencias IIR limitadas de forma segura respecto a Nyquist.
+- Revisión local disponible en Linux:
+  - `g++ -std=c++17 -Wall -Wextra -Werror -pedantic` sobre `DspCore.cpp`
+    con stubs mínimos de JUCE → OK.
+  - smoke test de 44.100 muestras, cambio Guitar/Bass y bypass → OK, todas las
+    salidas finitas.
+- No se ha podido ejecutar el build JUCE/CMake real en este entorno porque no
+  contiene CMake, JUCE, macOS, Xcode, `auval` ni Logic. No considerar P040
+  completada.
+- Estado correcto: **DSP corregido en código; build macOS, medición de aliasing,
+  nivel y prueba sonora pendientes**.
+
 ## Próxima acción
 
-Reconstruir/instalar el `.component` en `~/Library/Audio/Plug-Ins/Components/`,
+En macOS, reconstruir/instalar el `.component` en `~/Library/Audio/Plug-Ins/Components/`,
 reiniciar `AudioComponentRegistrar` y probar el A/B en Logic con una DI real a
 44.1/48 kHz. Luego actualizar `PROTOTYPE_RESULTS.md`.
 
-## Cambios sin commit
+## Cambios de esta sesión
 
-- `Source/DspCore.h` y `Source/DspCore.cpp`.
-- `Source/UiComponents.h` y `Source/UiComponents.cpp` creados.
-- `Source/PluginEditor.h` y `Source/PluginEditor.cpp` modificados.
-- `Source/PluginProcessor.h` y `Source/PluginProcessor.cpp` modificados.
-- `CMakeLists.txt` actualizado.
-- `docs/tasks_prototype.md` actualizado.
-- `HANDOFF.md` actualizado.
-- Directorio `build/` generado (no se debe incluir en el repositorio; está en `.gitignore`).
+Los cambios están publicados en `agent/literature-backed-dsp-corrections`. No se han incluido builds, plugins, datasets, audios ni stubs locales de validación.
 
 ## Regla para el siguiente agente
 
