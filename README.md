@@ -2,7 +2,7 @@
 
 Open-source DI conditioner for electric guitar and bass, designed to run immediately before [Neural Amp Modeler](https://www.neuralampmodeler.com/).
 
-> Status: prototype scaffold. The DSP and interface are not yet validated or released.
+> Status: prototype implementation under DSP and listening validation. It is not yet released.
 
 ## Goal
 
@@ -36,11 +36,11 @@ DI → DI Rescue → Neural Amp Modeler → cab/IR → mix
 - C++17, JUCE and CMake
 - zero or correctly reported latency
 
-The prototype plan and acceptance gate are documented in [`docs/CONTEXT_PROTOTYPE.md`](docs/CONTEXT_PROTOTYPE.md) and [`docs/tasks_prototype.md`](docs/tasks_prototype.md).
+The prototype plan and acceptance gate are documented in [`docs/CONTEXT_PROTOTYPE.md`](docs/CONTEXT_PROTOTYPE.md) and [`docs/tasks_prototype.md`](docs/tasks_prototype.md). The evidence behind the detector, transient and harmonic decisions is recorded in [`docs/LITERATURE_AND_DSP.md`](docs/LITERATURE_AND_DSP.md).
 
 ## Build status
 
-The repository is being initialized. Build commands will be verified on macOS before they are presented as supported.
+The previous DSP revision built as AU/VST3 and passed `auval` on macOS. The literature-backed DSP correction on the current branch still requires a fresh macOS Debug/Release build, `auval`, aliasing measurements and the level-matched listening test described in `PROTOTYPE_RESULTS.md`.
 
 ## Working with Codex and Devin
 
@@ -55,7 +55,9 @@ reconstructing prior decisions:
 - [`REVIEW.md`](REVIEW.md): review gates for DSP, UI and scope;
 - [`PROTOTYPE_BUILD.md`](PROTOTYPE_BUILD.md): verified build record;
 - [`PROTOTYPE_RESULTS.md`](PROTOTYPE_RESULTS.md): level-matched listening and
-  validation record.
+  validation record;
+- [`docs/LITERATURE_AND_DSP.md`](docs/LITERATURE_AND_DSP.md): primary sources,
+  DSP implications, implemented formulas and parameters still awaiting calibration.
 
 Start a coding session with:
 
