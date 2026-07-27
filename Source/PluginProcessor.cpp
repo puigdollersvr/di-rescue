@@ -9,10 +9,25 @@ DIRescueAudioProcessor::DIRescueAudioProcessor()
 {
 }
 
-void DIRescueAudioProcessor::prepareToPlay(double, int)
+void DIRescueAudioProcessor::prepareToPlay(double sampleRate, int)
 {
     inputPeak.store(0.0f);
     outputPeak.store(0.0f);
+
+    const auto numChannels = getTotalNumInputChannels();
+    channelDsp.clear();
+    channelDsp.reserve(static_cast<size_t>(numChannels));
+    for (int i = 0; i < numChannels; ++i)
+    {
+        channelDsp.emplace_back();
+        channelDsp.back().prepare(sampleRate);
+    }
+}
+
+void DIRescueAudioProcessor::reset()
+{
+    for (auto& channel : channelDsp)
+        channel.reset();
 }
 
 void DIRescueAudioProcessor::releaseResources()
@@ -43,17 +58,42 @@ void DIRescueAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         buffer.clear(channel, 0, buffer.getNumSamples());
     }
 
-    float peak = 0.0f;
+    auto* rawInstrument = parameters.getRawParameterValue("instrument");
+    auto* rawRestore    = parameters.getRawParameterValue("restore");
+    auto* rawBypass     = parameters.getRawParameterValue("bypass");
+    jassert(rawInstrument != nullptr && rawRestore != nullptr && rawBypass != nullptr);
 
-    for (auto channel = 0; channel < buffer.getNumChannels(); ++channel)
-        peak = juce::jmax(peak, buffer.getMagnitude(channel, 0, buffer.getNumSamples()));
+    const int instrumentIndex = (rawInstrument != nullptr) ? static_cast<int>(rawInstrument->load()) : 0;
+    const float restore       = (rawRestore != nullptr)    ? rawRestore->load() : 0.0f;
+    const bool bypass         = (rawBypass != nullptr)     ? (rawBypass->load() > 0.5f) : false;
 
-    inputPeak.store(peak, std::memory_order_relaxed);
+    for (auto channel = 0; channel < getTotalNumInputChannels(); ++channel)
+    {
+        const auto idx = static_cast<size_t>(channel);
+        channelDsp[idx].setInstrument(instrumentIndex);
+        channelDsp[idx].setTargets(restore, bypass);
+    }
 
-    // Prototype scaffold: DSP modules are intentionally implemented by the
-    // tasks in docs/tasks_prototype.md. Audio currently passes through.
+    for (auto channel = 0; channel < getTotalNumInputChannels(); ++channel)
+    {
+        const auto idx = static_cast<size_t>(channel);
+        auto* channelData = buffer.getWritePointer(channel);
+        for (auto s = 0; s < buffer.getNumSamples(); ++s)
+            channelData[s] = channelDsp[idx].processSample(channelData[s]);
+    }
 
-    outputPeak.store(peak, std::memory_order_relaxed);
+    float inPeak = 0.0f;
+    float outPeak = 0.0f;
+
+    for (auto channel = 0; channel < getTotalNumInputChannels(); ++channel)
+    {
+        const auto idx = static_cast<size_t>(channel);
+        inPeak = juce::jmax(inPeak, channelDsp[idx].getAndResetInputPeak());
+        outPeak = juce::jmax(outPeak, channelDsp[idx].getAndResetOutputPeak());
+    }
+
+    inputPeak.store(inPeak, std::memory_order_relaxed);
+    outputPeak.store(outPeak, std::memory_order_relaxed);
 }
 
 juce::AudioProcessorEditor* DIRescueAudioProcessor::createEditor()

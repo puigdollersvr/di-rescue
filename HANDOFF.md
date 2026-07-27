@@ -45,20 +45,58 @@
   - `getStateInformation`/`setStateInformation` guardan y recuperan el estado XML.
   - `auval` pasó los tests de parámetros y renderizado sin clicks ni crashes.
 
+## Fase P2 — Estado
+
+- **P020 — Implementar Input Safety:** implementado.
+  - `ChannelDsp` aplica un filtro `makeHighPass` a 20 Hz para DC + subsónico.
+  - Gestión de NaN/inf y denormales mediante `safeValue` y `ScopedNoDenormals`.
+  - Medición de peak de entrada/salida por bloque.
+- **P021 — AdaptiveSpectralRestorer:** implementado.
+  - Detectores IIR de banda para Guitar/Bass.
+  - `dullness score` suavizado y compuerta de señal útil.
+  - Corrección con high-shelf fija mezclada proporcionalmente a `Restore`.
+- **P022 — TransientRestorer:** implementado.
+  - Envelopes rápido/lento y reforzamiento del ataque limitado.
+  - Escalado por `Restore`.
+- **P023 — HarmonicRestorer:** implementado.
+  - Rama paralela filtrada, no linealidad suave `tanh`, mezcla baja.
+  - Sin oversampling (se añadirá solo si se detecta aliasing en validación).
+- **P024 — Integrar cadena, compensación y bypass:** implementado.
+  - Orden: Input Safety → AdaptiveSpectral → Transient → Harmonic → LevelComp → Bypass.
+  - Compensación determinista por `Restore`.
+  - Bypass con crossfade suavizado.
+  - `cmake --build build --config Debug --parallel` terminó correctamente (`** BUILD SUCCEEDED **`).
+
+## Correcciones post-revisión
+
+- `Source/DspCore.h/cpp`:
+  - Precomputa los coeficientes IIR para Guitar y Bass en `prepareToPlay` (`buildCoefficients`), evitando asignaciones de memoria en `processBlock` cuando cambia `Instrument`.
+  - `setInstrument` asigna coeficientes ya calculados sin reiniciar los estados IIR, dejando que `reset()` reinicie los filtros al arrancar o cuando el host lo solicita. Esto reduce los clicks al cambiar de Guitar/Bass en tiempo real.
+  - `processSample` utiliza `juce::Decibels::decibelsToGain` en lugar de `std::pow` para la compensación de nivel.
+- `Source/PluginProcessor.cpp`:
+  - Guardas contra punteros nulos de `getRawParameterValue`.
+  - `std::atomic<float>` se lee con `.load()` para evitar conversiones ambiguas.
+  - Índices a `channelDsp` convertidos a `size_t` para evitar avisos de signo.
+- `CMakeLists.txt`: eliminado `Source/DspCore.h` de `target_sources`.
+- `cmake --build build --config Debug --parallel` terminó correctamente (`** BUILD SUCCEEDED **`) tras las correcciones.
+
 ## Evidencia que falta
 
 - No consta todavía una carga en Logic ni una prueba sonora real.
 - No se ha verificado Release build (P040).
-- P020–P030 y P040–P042 aún no están verificados.
+- P030 y P040–P042 aún no están verificados.
 
 ## Próxima acción
 
-Continuar con **P020 — Implementar Input Safety**: añadir DC blocker, filtro
-subsónico suave, gestión de denormales/NaN/inf, y medición de peak de entrada y
-salida.
+Continuar con **P040 — Validar build y estabilidad mínima**: compilar Release,
+ejecutar `auval`, probar 44.1/48 kHz y verificar que el DSP no produce clicks,
+NaN ni clipping en una DI real.
 
 ## Cambios sin commit
 
+- `Source/DspCore.h` y `Source/DspCore.cpp` creados.
+- `Source/PluginProcessor.h` y `Source/PluginProcessor.cpp` modificados.
+- `CMakeLists.txt` actualizado con los nuevos archivos fuente.
 - `PROTOTYPE_BUILD.md` actualizado.
 - `docs/DSP_REFS.md` creado.
 - `docs/tasks_prototype.md` actualizado con tareas marcadas.

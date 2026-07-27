@@ -37,6 +37,7 @@ juce_generate_juce_header(DIRescue)
 
 target_sources(DIRescue
     PRIVATE
+        Source/DspCore.cpp
         Source/PluginEditor.cpp
         Source/PluginEditor.h
         Source/PluginProcessor.cpp

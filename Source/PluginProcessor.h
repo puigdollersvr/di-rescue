@@ -3,6 +3,9 @@
 #include <JuceHeader.h>
 
 #include <atomic>
+#include <vector>
+
+#include "DspCore.h"
 
 class DIRescueAudioProcessor final : public juce::AudioProcessor
 {
@@ -14,6 +17,7 @@ public:
     void releaseResources() override;
     bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
     void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void reset() override;
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
@@ -40,6 +44,8 @@ public:
     std::atomic<float> outputPeak { 0.0f };
 
 private:
+    std::vector<rescue_dsp::ChannelDsp> channelDsp;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DIRescueAudioProcessor)
 };
 

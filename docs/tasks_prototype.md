@@ -107,7 +107,9 @@
 
 ## Fase P2 — Núcleo sonoro
 
-### [ ] P020 — Implementar Input Safety
+### [x] P020 — Implementar Input Safety
+
+**Estado:** implementado en código; validación sonora pendiente.
 
 **Estimación:** 15–20 min.
 
@@ -127,7 +129,9 @@
 - Con Restore a 0, la diferencia se limita a DC y subgraves fuera del rango útil.
 - No existe limitador, normalizador ni soft clipper.
 
-### [ ] P021 — Implementar AdaptiveSpectralRestorer
+### [x] P021 — Implementar AdaptiveSpectralRestorer
+
+**Estado:** implementado en código; validación sonora pendiente.
 
 **Estimación:** 40–55 min.
 
@@ -150,7 +154,9 @@
 - No se aplica la misma curva fija a todo.
 - No hay FFT, lookahead, lectura de archivos ni asignaciones en `processBlock`.
 
-### [ ] P022 — Implementar TransientRestorer
+### [x] P022 — Implementar TransientRestorer
+
+**Estado:** implementado en código; validación sonora pendiente.
 
 **Estimación:** 20–30 min.
 
@@ -171,7 +177,9 @@
 - Restore a 0 es neutro.
 - Palm mutes no producen picos descontrolados.
 
-### [ ] P023 — Implementar HarmonicRestorer
+### [x] P023 — Implementar HarmonicRestorer
+
+**Estado:** implementado en código; validación sonora pendiente.
 
 **Estimación:** 25–40 min.
 
@@ -195,7 +203,9 @@
 - El P-Bass conserva el fundamental.
 - No aparece aliasing molesto en la prueba básica.
 
-### [ ] P024 — Integrar cadena, compensación y bypass
+### [x] P024 — Integrar cadena, compensación y bypass
+
+**Estado:** implementado en código; validación sonora pendiente.
 
 **Estimación:** 25–35 min.
 
