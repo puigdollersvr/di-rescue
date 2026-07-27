@@ -17,9 +17,9 @@ Input Safety
 
 | Restaurador | Ganancia máxima a `Restore = 100` | Notas |
 | --- | --- | --- |
-| `AdaptiveSpectralRestorer` | +2 a +3 dB | Solo cuando el `dullness score` indique DI apagada. |
-| `TransientRestorer` | +0.5 a +1.5 dB | Solo ataque; el sustain debe cambiar muy poco. |
-| `HarmonicRestorer` | bajo/nivel sutil | Mezcla a nivel bajo, evitar `fizz`. |
+| `AdaptiveSpectralRestorer` | +2,5 dB natural; +4,5 dB en audición | Adaptativo hasta 65; 65–100 hace el efecto progresivamente evidente. |
+| `TransientRestorer` | +1,2 dB natural; +2,0 dB máximo | Solo cuando la relación rápida/lenta indique ataque. |
+| `HarmonicRestorer` | residuo no lineal sutil | `tanh` normalizada con ADAA; sin fuga lineal dominante. |
 
 ## Bandas para `AdaptiveSpectralRestorer`
 
@@ -54,3 +54,23 @@ Input Safety
 - Determinista, asociada a `Restore`.
 - Objetivo: RMS a corto plazo dentro de ±0.5 dB respecto a la entrada en material de validación.
 - No normalizar por nota ni perseguir constantemente el RMS.
+
+
+## Revisión respaldada por literatura — 2026-07-27
+
+- El detector sigue potencia al cuadrado y compara densidades aproximadas por
+  ancho en octavas.
+- El brillo se expresa como relación logarítmica entre Presence/Top y Body.
+- Las referencias iniciales son −9 dB con 12 dB de recorrido para Guitar y
+  −12 dB con 14 dB de recorrido para Bass.
+- El transient restorer usa la relación rápida/lenta en dB, con una zona neutra
+  de 1 dB.
+- La rama armónica resta la respuesta lineal equivalente de la `tanh` y usa
+  ADAA de primer orden para reducir aliasing conservando latencia cero.
+- La compensación global de −3 dB se sustituye por una compensación pequeña
+  asociada a la corrección realmente aplicada.
+- `Restore` leído mediante APVTS ya está en 0–100; no se multiplica por 100.
+- Los fundamentos, fórmulas, fuentes y límites están en
+  [`LITERATURE_AND_DSP.md`](LITERATURE_AND_DSP.md).
+
+Todos estos valores siguen pendientes de calibración sonora en P041–P042.
