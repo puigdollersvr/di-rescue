@@ -16,7 +16,7 @@
 
 ## Fase P0 — Preparación
 
-### [ ] P001 — Fijar el entorno
+### [x] P001 — Fijar el entorno
 
 **Estimación:** 10–15 min.
 
@@ -35,7 +35,7 @@
 - No se utiliza una rama flotante de JUCE.
 - No se instalan herramientas innecesarias.
 
-### [ ] P002 — Trasladar las referencias DSP mínimas
+### [x] P002 — Trasladar las referencias DSP mínimas
 
 **Estimación:** 10–15 min.
 
@@ -57,7 +57,7 @@
 
 ## Fase P1 — Plugin cargable
 
-### [ ] P010 — Crear el proyecto JUCE/CMake
+### [x] P010 — Crear el proyecto JUCE/CMake
 
 **Estimación:** 30–40 min.
 
@@ -79,7 +79,7 @@
 - Logic o un host de prueba carga el plugin.
 - El audio pasa sin cambios ni crashes.
 
-### [ ] P011 — Crear parámetros y estado mínimo
+### [x] P011 — Crear parámetros y estado mínimo
 
 **Estimación:** 15–20 min.
 

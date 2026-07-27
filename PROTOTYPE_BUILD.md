@@ -8,7 +8,7 @@ comando como verificado sin ejecutarlo.
 - Proyecto: `DIRescue` 0.1.0.
 - Lenguaje: C++17.
 - Sistema de build: CMake 3.22 o posterior.
-- JUCE: 8.0.13, referencia concreta mediante `FetchContent`.
+- JUCE: `8.0.13` referenciado de forma concreta mediante `FetchContent` (`GIT_TAG 8.0.13`, no rama flotante).
 - Formatos: AU y VST3.
 - Producto: `DI Rescue`.
 - Bundle identifier: `com.puigdollersvr.direscue`.
@@ -17,58 +17,58 @@ comando como verificado sin ejecutarlo.
 
 ## Entorno macOS verificado
 
-- Fecha:
-- macOS:
-- Arquitectura:
-- Xcode:
-- Apple Clang:
-- CMake:
-- Generador CMake:
-- Host de prueba:
+- Fecha: 2026-07-27.
+- macOS: 26.5.2 (build 25F84).
+- Arquitectura: `x86_64` (`uname -m`); `uname -p` reporta `i386`; CPU Intel Core i9-9980HK.
+- Xcode: `/Applications/Xcode.app/Contents/Developer`, `Xcode 26.5 Build 17F42`.
+- Apple Clang: `Apple clang version 21.0.0 (clang-2100.1.1.101)`; target `x86_64-apple-darwin25.5.0`.
+- CMake: `/usr/local/bin/cmake` version `4.4.0`.
+- Generador CMake: `Xcode`.
+- Host de prueba: `auval -v aufx DiRs Pdrv`.
 
 ## Configuración Debug
 
 ```bash
-# Pendiente de ejecutar y registrar en P001/P010
+cmake -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64
 ```
 
 ## Build Debug
 
 ```bash
-# Pendiente de ejecutar y registrar en P010
+cmake --build build --config Debug --parallel
 ```
 
 ## Configuración Release
 
 ```bash
-# Pendiente de ejecutar y registrar en P040
+cmake -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64
 ```
 
 ## Build Release
 
 ```bash
-# Pendiente de ejecutar y registrar en P040
+cmake --build build --config Release --parallel
 ```
 
 ## Artefactos
 
-- Audio Unit:
-- VST3:
-- Ubicación de prueba:
+- Audio Unit: `build/DIRescue_artefacts/${CONFIG}/DI Rescue.component`.
+- VST3: `build/DIRescue_artefacts/${CONFIG}/DI Rescue.vst3`.
+- Ubicación de prueba: `~/Library/Audio/Plug-Ins/Components/` y `~/Library/Audio/Plug-Ins/VST3/`.
 
 ## Validación AU
 
 ```bash
-# Pendiente de ejecutar y registrar en P040
+auval -v aufx DiRs Pdrv
 ```
 
 ## Resultado
 
-- CMake configure:
-- Debug build:
-- Release build:
-- `auval`:
-- Carga en Logic:
-- Limitaciones:
+- CMake configure: **OK** (`cmake -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64`).
+- Debug build: **OK** (`cmake --build build --config Debug --parallel`).
+- Release build: pendiente.
+- `auval`: **PASS** (`auval -v aufx DiRs Pdrv` tras copiar el `.component` a `~/Library/Audio/Plug-Ins/Components/` y reiniciar `AudioComponentRegistrar`).
+- Carga en Logic: pendiente.
+- Limitaciones: el entorno detectado es `x86_64` Intel, mientras que el alcance del prototipo prioriza Apple Silicon. El build actual se hará nativo sobre esta máquina; si se necesita un binario Apple Silicon se deberá compilar en el hardware correspondiente.
 
 No añadir instalador al prototipo ni utilizar una referencia flotante de JUCE.
