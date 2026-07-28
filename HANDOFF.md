@@ -1,6 +1,39 @@
 # DI Rescue — Handoff Codex/Devin
 
-Última actualización documental: 2026-07-27.
+Última actualización documental: 2026-07-28.
+
+## Correcciones críticas de UI thread y peaks atómicos — 2026-07-28
+
+- Problemas reportados:
+  1. `parameterChanged()` en `PluginEditor.cpp` modificaba `instrumentSelector` directamente desde el hilo de audio, pudiendo causar condiciones de carrera y avisos en Logic.
+  2. Los picos atómicos se sobrescribían cada bloque, perdiendo clips entre lecturas de la UI.
+
+- Cambios en `Source/PluginEditor.h`:
+  - Añadido `#include <atomic>`.
+  - Añadido `std::atomic<int> pendingInstrumentIndex { -1 };`.
+
+- Cambios en `Source/PluginEditor.cpp`:
+  - `parameterChanged()` solo almacena el índice pendiente en `pendingInstrumentIndex` (sin tocar componentes).
+  - `timerCallback()` aplica el cambio de instrumento desde el hilo de UI y lee los peaks con `exchange(0.0f)`.
+
+- Cambios en `Source/PluginProcessor.cpp`:
+  - Los peaks atómicos se actualizan con `compare_exchange_weak` para acumular el máximo entre lecturas de la UI.
+
+- Comandos ejecutados y resultados:
+  - `cmake -B build -G Xcode` → OK.
+  - `cmake --build build --config Debug --parallel` → **BUILD SUCCEEDED**.
+  - `cmake --build build --config Release --parallel` → **BUILD SUCCEEDED**.
+  - Instalado `build/DIRescue_artefacts/Release/AU/DI Rescue.component` en `~/Library/Audio/Plug-Ins/Components/` y reiniciado `AudioComponentRegistrar`.
+  - `auval -v aufx DiRs Pdrv` → **AU VALIDATION SUCCEEDED** (se probaron 44.1 kHz, 48 kHz y otros sample rates).
+  - `tests/dsp_smoke.cpp` añadido y registrado en `CMakeLists.txt` con CTest; `ctest -C Debug --output-on-failure` → **Passed**.
+
+- Pruebas pendientes:
+  - Carga real en Logic.
+  - Medición de RMS, peak, respuesta espectral y aliasing.
+  - Prueba real DI Rescue → NAM.
+
+- Próxima acción única:
+  - Preparar la sesión A/B con DIs existentes y el mismo NAM/cab/IR.
 
 ## Base observada
 
@@ -149,7 +182,6 @@
   `~/Library/Audio/Plug-Ins/Components/`.
 - Se reinició `AudioComponentRegistrar` para invalidar la caché de Audio Units.
 - Pruebas pendientes: escucha A/B con DI real en Logic a 44.1/48 kHz y `auval`.
-
 
 ## Corrección respaldada por literatura — 2026-07-27
 

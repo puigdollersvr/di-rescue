@@ -266,7 +266,7 @@
 
 ## Fase P4 — Validación técnica y sonora
 
-### [ ] P040 — Validar build y estabilidad mínima
+### [x] P040 — Validar build y estabilidad mínima
 
 **Estimación:** 15–20 min.
 

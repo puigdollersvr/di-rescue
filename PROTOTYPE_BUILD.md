@@ -17,7 +17,7 @@ comando como verificado sin ejecutarlo.
 
 ## Entorno macOS verificado
 
-- Fecha: 2026-07-27.
+- Fecha: 2026-07-28.
 - macOS: 26.5.2 (build 25F84).
 - Arquitectura: `x86_64` (`uname -m`); `uname -p` reporta `i386`; CPU Intel Core i9-9980HK.
 - Xcode: `/Applications/Xcode.app/Contents/Developer`, `Xcode 26.5 Build 17F42`.
@@ -62,13 +62,22 @@ cmake --build build --config Release --parallel
 auval -v aufx DiRs Pdrv
 ```
 
+## Tests DSP mínimos
+
+```bash
+ctest -C Debug --output-on-failure
+```
+
+- `tests/dsp_smoke.cpp` cubre silencio, identidad en bypass, finitud, Restore=0 conservativo, cambios sin discontinuidades y respuesta a Restore.
+
 ## Resultado
 
 - CMake configure: **OK** (`cmake -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64`).
 - Debug build: **OK** (`cmake --build build --config Debug --parallel`).
-- Release build: pendiente.
-- `auval`: **PASS** (`auval -v aufx DiRs Pdrv` tras copiar el `.component` a `~/Library/Audio/Plug-Ins/Components/` y reiniciar `AudioComponentRegistrar`).
+- Release build: **OK** (`cmake --build build --config Release --parallel`).
+- `auval`: **PASS** (`auval -v aufx DiRs Pdrv` tras copiar el `DI Rescue.component` Release a `~/Library/Audio/Plug-Ins/Components/` y reiniciar `AudioComponentRegistrar`).
+- `ctest` (Debug): **PASS** (`1/1 Test #1: DspSmoke ... Passed`).
 - Carga en Logic: pendiente.
-- Limitaciones: el entorno detectado es `x86_64` Intel, mientras que el alcance del prototipo prioriza Apple Silicon. El build actual se hará nativo sobre esta máquina; si se necesita un binario Apple Silicon se deberá compilar en el hardware correspondiente.
+- Limitaciones: el entorno detectado es `x86_64` Intel, mientras que el alcance del prototipo prioriza Apple Silicon. El build actual se hizo nativo sobre esta máquina; si se necesita un binario Apple Silicon se deberá compilar en el hardware correspondiente.
 
 No añadir instalador al prototipo ni utilizar una referencia flotante de JUCE.

@@ -98,8 +98,33 @@ void DIRescueAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         outPeak = std::max(outPeak, channel.getAndResetOutputPeak());
     }
 
-    inputPeak.store(inPeak, std::memory_order_relaxed);
-    outputPeak.store(outPeak, std::memory_order_relaxed);
+    auto updateAtomicPeak = [](std::atomic<float>& peak, float local)
+    {
+        float expected = peak.load(std::memory_order_relaxed);
+
+        while (true)
+        {
+            if (local <= expected)
+            {
+                float desired = expected;
+
+                if (peak.compare_exchange_weak(expected, desired,
+                                               std::memory_order_relaxed,
+                                               std::memory_order_relaxed))
+                    break;
+
+                continue;
+            }
+
+            if (peak.compare_exchange_weak(expected, local,
+                                           std::memory_order_relaxed,
+                                           std::memory_order_relaxed))
+                break;
+        }
+    };
+
+    updateAtomicPeak(inputPeak, inPeak);
+    updateAtomicPeak(outputPeak, outPeak);
 }
 
 juce::AudioProcessorEditor* DIRescueAudioProcessor::createEditor()

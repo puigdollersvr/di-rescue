@@ -95,7 +95,12 @@ InstrumentSelector::InstrumentSelector()
 
 void InstrumentSelector::setSelectedIndex(int index)
 {
-    setSelectedItem(index);
+    index = juce::jlimit(0, 1, index);
+    if (index == selectedIndex)
+        return;
+
+    selectedIndex = index;
+    repaint();
 }
 
 int InstrumentSelector::getSelectedIndex() const
@@ -151,14 +156,10 @@ void InstrumentSelector::mouseDown(const juce::MouseEvent& e)
 
 void InstrumentSelector::setSelectedItem(int index)
 {
-    index = juce::jlimit(0, 1, index);
-    if (index == selectedIndex)
-        return;
+    const auto previous = selectedIndex;
+    setSelectedIndex(index);
 
-    selectedIndex = index;
-    repaint();
-
-    if (onSelectionChanged)
+    if (selectedIndex != previous && onSelectionChanged)
         onSelectionChanged(selectedIndex);
 }
 

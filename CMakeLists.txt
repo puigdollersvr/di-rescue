@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(CTest)
+enable_testing()
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -62,4 +65,13 @@ target_link_libraries(DIRescue
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
 )
+
+add_executable(DIRescueDspSmoke tests/dsp_smoke.cpp Source/DspCore.cpp)
+target_include_directories(DIRescueDspSmoke PRIVATE Source)
+target_link_libraries(DIRescueDspSmoke PRIVATE
+    juce::juce_dsp
+    juce::juce_audio_basics
+    juce::juce_core
+)
+add_test(NAME DspSmoke COMMAND DIRescueDspSmoke)
 

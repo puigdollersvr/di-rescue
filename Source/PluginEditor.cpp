@@ -61,17 +61,22 @@ DIRescueAudioProcessorEditor::~DIRescueAudioProcessorEditor()
     bypassButton.setLookAndFeel(nullptr);
 }
 
-void DIRescueAudioProcessorEditor::parameterChanged(const juce::String& parameterID, float)
+void DIRescueAudioProcessorEditor::parameterChanged(const juce::String& parameterID, float newValue)
 {
     if (parameterID == "instrument")
-        if (auto* v = audioProcessor.parameters.getRawParameterValue("instrument"))
-            instrumentSelector.setSelectedIndex(static_cast<int>(v->load()));
+        pendingInstrumentIndex.store(static_cast<int>(newValue), std::memory_order_relaxed);
 }
 
 void DIRescueAudioProcessorEditor::timerCallback()
 {
-    const float inPeak = audioProcessor.inputPeak.load(std::memory_order_relaxed);
-    const float outPeak = audioProcessor.outputPeak.load(std::memory_order_relaxed);
+    if (const int pendingIndex = pendingInstrumentIndex.exchange(-1, std::memory_order_acquire);
+        pendingIndex >= 0)
+    {
+        instrumentSelector.setSelectedIndex(pendingIndex);
+    }
+
+    const float inPeak = audioProcessor.inputPeak.exchange(0.0f, std::memory_order_relaxed);
+    const float outPeak = audioProcessor.outputPeak.exchange(0.0f, std::memory_order_relaxed);
 
     inMeter.setLevelDb(juce::Decibels::gainToDecibels(inPeak, -60.0f));
     outMeter.setLevelDb(juce::Decibels::gainToDecibels(outPeak, -60.0f));

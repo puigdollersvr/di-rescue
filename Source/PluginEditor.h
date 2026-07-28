@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include <JuceHeader.h>
 
 #include "PluginProcessor.h"
@@ -39,6 +41,8 @@ private:
 
     std::unique_ptr<SliderAttachment> restoreAttachment;
     std::unique_ptr<ButtonAttachment> bypassAttachment;
+
+    std::atomic<int> pendingInstrumentIndex { -1 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DIRescueAudioProcessorEditor)
 };
