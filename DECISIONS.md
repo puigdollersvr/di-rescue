@@ -18,6 +18,10 @@ instrucción del usuario.
 | Material | DIs existentes; no se requieren grabaciones nuevas para V1. |
 | Nivel | A/B aproximadamente dentro de ±0,5 dB de RMS a corto plazo. |
 | Referencia tonal | No se promete igualar una DI concreta de estudio ni unas cuerdas nuevas. |
+| Detector | Potencia por bandas, densidad aproximada por octava y relación logarítmica; referencias separadas Guitar/Bass. |
+| Restore | 0–65 es zona conservadora adaptativa; 65–100 es zona de audición y 100 debe ser claramente audible. |
+| Armónicos | `tanh` normalizada con residuo no lineal y ADAA de primer orden; no se denomina emulación de válvulas. |
+| Parámetros APVTS | `getRawParameterValue("restore")` entrega el valor declarado 0–100, no un 0–1 normalizado. |
 | Color de previo | No se emulan válvulas, transformadores ni una interfaz concreta. |
 | Ruido | Sin Clean, Hum, Gate ni reducción de ruido en el prototipo. |
 | Aprendizaje | Sin Learn, matching, perfiles ni pares old/fresh. |

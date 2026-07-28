@@ -85,7 +85,7 @@ El archivo `di-rescue-ui-mockup.png` es la referencia visual oficial y debe impl
 
 No añadir Output, Input Gain, Clean, Hum, Gate, EQ, Amp, Cab, Drive ni presets.
 
-Los parámetros deben poder automatizarse y deben suavizarse donde sea necesario. El guardado de estado es deseable, pero no debe retrasar la prueba sonora si surge un problema incidental.
+`getRawParameterValue("restore")` entrega el valor en las unidades declaradas 0–100; no debe tratarse como 0–1 ni multiplicarse por 100. Los parámetros deben poder automatizarse y deben suavizarse donde sea necesario. El guardado de estado es deseable, pero no debe retrasar la prueba sonora si surge un problema incidental.
 
 ### 5.1 Distribución
 
@@ -133,6 +133,9 @@ Input Safety
 → Output Safety/Meter
 ```
 
+La evidencia, las fórmulas implementadas y los parámetros que siguen sujetos a
+calibración se documentan en [`LITERATURE_AND_DSP.md`](LITERATURE_AND_DSP.md).
+
 ### 6.1 Input Safety
 
 - Eliminar DC mediante un filtro adecuado.
@@ -148,11 +151,12 @@ Objetivo: detectar una DI relativamente apagada y aplicar una corrección amplia
 Implementación mínima:
 
 - filtros IIR y seguidores de energía preasignados;
-- comparación de energía entre cuerpo, presencia y extremo superior;
-- `dullness score` suavizado entre 0 y 1;
+- comparación de potencia entre cuerpo, presencia y extremo superior, con normalización aproximada por ancho en octavas;
+- relación espectral calculada en dB y `dullness score` suavizado entre 0 y 1;
 - umbral de señal útil para no reaccionar al silencio;
 - retorno lento a estado neutro;
-- ganancia máxima aproximada de 2–3 dB con `Restore = 100`;
+- shelf máximo de 2,5 dB en la zona conservadora `Restore = 0–65`;
+- zona de audición progresiva entre 65 y 100, con máximo de 4,5 dB para que `Restore = 100` sea claramente audible;
 - zona de tolerancia suficientemente amplia para no tratar automáticamente una humbucker oscura como defectuosa;
 - ausencia de FFT, lookahead, archivos externos y asignaciones en el hilo de audio.
 
@@ -170,7 +174,8 @@ Estas bandas son puntos de partida. Se permite ajustarlas durante la escucha, pe
 - Calcular un envelope rápido y otro lento.
 - Derivar una medida de transitorio estable.
 - Reforzar solo los ataques.
-- Ganancia máxima aproximada de 0.5–1.5 dB a `Restore = 100`.
+- Calcular la relación rápida/lenta sobre potencia y expresarla en dB.
+- Ganancia máxima aproximada de 1,2 dB en la zona natural y 2,0 dB en la zona de audición.
 - Utilizar tiempos distintos para Guitar y Bass si mejora claramente la respuesta.
 - No aumentar apreciablemente el sustain.
 
@@ -180,15 +185,16 @@ Estas bandas son puntos de partida. Se permite ajustarlas durante la escucha, pe
 - Filtrar antes de la no linealidad:
   - Guitar: comenzar las pruebas entre 1.2 y 2 kHz;
   - Bass: comenzar entre 600 Hz y 1.2 kHz.
-- Utilizar una no linealidad simétrica y suave.
+- Utilizar una no linealidad simétrica y suave, normalizada a ganancia unitaria para señal pequeña.
+- Restar la respuesta lineal equivalente para mezclar únicamente el residuo no lineal.
+- Reducir aliasing mediante ADAA de primer orden; evaluar igualmente a 44.1 y 48 kHz.
 - Eliminar graves de la rama y limitar su extremo superior si genera fizz.
 - Mezclarla a nivel bajo en función de `Restore`.
-- Evaluar aliasing a 44.1 kHz.
-- Añadir oversampling 2× solo si el aliasing resulta audible o evidente en una prueba sencilla; si se añade latencia, declararla correctamente.
+- Mantener latencia cero; considerar oversampling por bloques solo si ADAA no supera la medición o escucha posterior.
 
 ### 6.5 LevelCompensator
 
-- Aplicar una compensación determinista asociada a la cantidad máxima introducida por Restore.
+- Aplicar una compensación pequeña y determinista asociada a la corrección realmente introducida por Restore.
 - No normalizar cada nota ni perseguir constantemente el RMS.
 - Evitar que NAM distorsione más por una simple subida de nivel.
 - Objetivo inicial: RMS a corto plazo dentro de ±0.5 dB en el paquete de validación, aceptando pequeñas diferencias en los ataques.

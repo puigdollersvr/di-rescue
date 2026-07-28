@@ -60,13 +60,19 @@ void DIRescueAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     }
 
     auto* rawInstrument = parameters.getRawParameterValue("instrument");
-    auto* rawRestore    = parameters.getRawParameterValue("restore");
-    auto* rawBypass     = parameters.getRawParameterValue("bypass");
+    auto* rawRestore = parameters.getRawParameterValue("restore");
+    auto* rawBypass = parameters.getRawParameterValue("bypass");
     jassert(rawInstrument != nullptr && rawRestore != nullptr && rawBypass != nullptr);
 
-    const int instrumentIndex = (rawInstrument != nullptr) ? static_cast<int>(rawInstrument->load()) : 0;
-    const float restore       = (rawRestore != nullptr)    ? rawRestore->load() * 100.0f : 0.0f; // raw is 0..1, DspCore expects 0..100
-    const bool bypass         = (rawBypass != nullptr)     ? (rawBypass->load() > 0.5f) : false;
+    const int instrumentIndex = rawInstrument != nullptr
+        ? static_cast<int>(rawInstrument->load())
+        : 0;
+
+    // APVTS returns the parameter's denormalised value. Restore is declared
+    // as 0..100, so multiplying by 100 here would compress the complete DSP
+    // range into the first 1% of the user control.
+    const float restore = rawRestore != nullptr ? rawRestore->load() : 0.0f;
+    const bool bypass = rawBypass != nullptr && rawBypass->load() > 0.5f;
 
     for (auto channel = 0; channel < getTotalNumInputChannels(); ++channel)
     {
@@ -86,11 +92,10 @@ void DIRescueAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     float inPeak = 0.0f;
     float outPeak = 0.0f;
 
-    for (auto channel = 0; channel < getTotalNumInputChannels(); ++channel)
+    for (auto& channel : channelDsp)
     {
-        const auto idx = static_cast<size_t>(channel);
-        inPeak = juce::jmax(inPeak, channelDsp[idx].getAndResetInputPeak());
-        outPeak = juce::jmax(outPeak, channelDsp[idx].getAndResetOutputPeak());
+        inPeak = std::max(inPeak, channel.getAndResetInputPeak());
+        outPeak = std::max(outPeak, channel.getAndResetOutputPeak());
     }
 
     inputPeak.store(inPeak, std::memory_order_relaxed);
@@ -196,4 +201,3 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new DIRescueAudioProcessor();
 }
-
