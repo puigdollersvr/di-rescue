@@ -11,7 +11,8 @@ DIRescueAudioProcessorEditor::DIRescueAudioProcessorEditor(
     : AudioProcessorEditor(&processorToUse),
       audioProcessor(processorToUse)
 {
-    instrumentSelector.setSelectedIndex(0);
+    if (auto* param = audioProcessor.parameters.getParameter("instrument"))
+        instrumentSelector.setSelectedIndex(juce::roundToInt(param->getValue()));
     instrumentSelector.onSelectionChanged = [this](int index)
     {
         if (auto* param = audioProcessor.parameters.getParameter("instrument"))
@@ -46,7 +47,8 @@ DIRescueAudioProcessorEditor::DIRescueAudioProcessorEditor(
         audioProcessor.parameters, "bypass", bypassButton);
 
     audioProcessor.parameters.addParameterListener("instrument", this);
-    parameterChanged("instrument", 0.0f);
+    if (auto* param = audioProcessor.parameters.getParameter("instrument"))
+        parameterChanged("instrument", param->getValue());
 
     setSize(editorWidth, editorHeight);
     setResizable(false, false);

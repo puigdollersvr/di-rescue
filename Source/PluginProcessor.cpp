@@ -194,7 +194,11 @@ void DIRescueAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 void DIRescueAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     if (auto xml = getXmlFromBinary(data, sizeInBytes))
-        parameters.replaceState(juce::ValueTree::fromXml(*xml));
+    {
+        auto tree = juce::ValueTree::fromXml(*xml);
+        if (tree.isValid() && tree.getType() == parameters.state.getType())
+            parameters.replaceState(tree);
+    }
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout

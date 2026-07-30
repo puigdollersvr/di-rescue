@@ -1,6 +1,48 @@
 # DI Rescue — Handoff Codex/Devin
 
-Última actualización documental: 2026-07-28.
+Última actualización documental: 2026-07-30.
+
+## Corrección de persistencia del parámetro Instrument — 2026-07-30
+
+- Problema reportado: al cerrar el plugin en una pista de bajo con `Instrument`
+  en Bass, al reabrirlo el selector volvía a Guitar aunque el estado del host
+  siguiera siendo Bass.
+- Causa: en el constructor de `DIRescueAudioProcessorEditor`
+  (`Source/PluginEditor.cpp`) se llamaba a `parameterChanged("instrument", 0.0f)`
+  con un valor hardcoded `0.0f` (Guitar) en lugar de leer el valor real del
+  parámetro. El listener de APVTS solo se dispara cuando el parámetro _cambia_,
+  no al abrir el editor, así que la UI siempre arrancaba pintando Guitar con
+  independencia del estado guardado. El DSP sí procesaba como Bass, pero la UI
+  mentía.
+- Cambios en esta sesión (2 archivos):
+  - `Source/PluginEditor.cpp`:
+    - Línea 14: sustituido `instrumentSelector.setSelectedIndex(0)` (hardcoded
+      Guitar) por la lectura del valor real del parámetro:
+      `instrumentSelector.setSelectedIndex(juce::roundToInt(param->getValue()))`.
+      Esto elimina el flash inicial de Guitar → Bass al abrir el editor.
+    - Líneas 48-50: sustituida la llamada `parameterChanged("instrument", 0.0f)`
+      por `parameterChanged("instrument", param->getValue())` para que el
+      listener arranque sincronizado con el estado real del parámetro.
+  - `Source/PluginProcessor.cpp`:
+    - `setStateInformation`: añadida validación de que el XML tenga el tag
+      correcto (`parameters.state.getType()`, es decir "PARAMETERS") antes de
+      llamar a `replaceState`. Si el host enviara state corrupto o de otra
+      versión, se ignora en lugar de reemplazar el árbol por algo inválido.
+- Comandos ejecutados y resultados:
+  - `cmake --build build --config Debug --parallel` → **BUILD SUCCEEDED**.
+  - `cmake --build build --config Release --parallel` → **BUILD SUCCEEDED**.
+  - `ctest -C Debug --output-on-failure` → **Passed** (1/1 DspSmoke).
+  - Instalado `build/DIRescue_artefacts/Release/AU/DI Rescue.component` en
+    `~/Library/Audio/Plug-Ins/Components/` y
+    `build/DIRescue_artefacts/Release/VST3/DI Rescue.vst3` en
+    `~/Library/Audio/Plug-Ins/VST3/`, y reiniciado `AudioComponentRegistrar`.
+- Pruebas pendientes:
+  - Verificación en Logic: poner Instrument en Bass, cerrar la ventana del
+    plugin, reabrirla y confirmar que el selector sigue en Bass sin flash
+    inicial de Guitar.
+  - Lo mismo para Guitar como caso inverso.
+- Próxima acción única: validar en Logic la persistencia visual de Instrument al
+  cerrar y reabrir el plugin, confirmando que no hay parpadeo inicial.
 
 ## Correcciones críticas de UI thread y peaks atómicos — 2026-07-28
 
