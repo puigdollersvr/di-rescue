@@ -100,25 +100,13 @@ void DIRescueAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
     auto updateAtomicPeak = [](std::atomic<float>& peak, float local)
     {
-        float expected = peak.load(std::memory_order_relaxed);
+        float expected = peak.load(std::memory_order_acquire);
 
-        while (true)
+        while (local > expected)
         {
-            if (local <= expected)
-            {
-                float desired = expected;
-
-                if (peak.compare_exchange_weak(expected, desired,
-                                               std::memory_order_relaxed,
-                                               std::memory_order_relaxed))
-                    break;
-
-                continue;
-            }
-
             if (peak.compare_exchange_weak(expected, local,
-                                           std::memory_order_relaxed,
-                                           std::memory_order_relaxed))
+                                           std::memory_order_acq_rel,
+                                           std::memory_order_acquire))
                 break;
         }
     };

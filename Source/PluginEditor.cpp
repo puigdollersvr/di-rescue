@@ -66,7 +66,7 @@ DIRescueAudioProcessorEditor::~DIRescueAudioProcessorEditor()
 void DIRescueAudioProcessorEditor::parameterChanged(const juce::String& parameterID, float newValue)
 {
     if (parameterID == "instrument")
-        pendingInstrumentIndex.store(static_cast<int>(newValue), std::memory_order_relaxed);
+        pendingInstrumentIndex.store(juce::roundToInt(newValue), std::memory_order_release);
 }
 
 void DIRescueAudioProcessorEditor::timerCallback()
@@ -77,8 +77,8 @@ void DIRescueAudioProcessorEditor::timerCallback()
         instrumentSelector.setSelectedIndex(pendingIndex);
     }
 
-    const float inPeak = audioProcessor.inputPeak.exchange(0.0f, std::memory_order_relaxed);
-    const float outPeak = audioProcessor.outputPeak.exchange(0.0f, std::memory_order_relaxed);
+    const float inPeak = audioProcessor.inputPeak.exchange(0.0f, std::memory_order_acq_rel);
+    const float outPeak = audioProcessor.outputPeak.exchange(0.0f, std::memory_order_acq_rel);
 
     inMeter.setLevelDb(juce::Decibels::gainToDecibels(inPeak, -60.0f));
     outMeter.setLevelDb(juce::Decibels::gainToDecibels(outPeak, -60.0f));
