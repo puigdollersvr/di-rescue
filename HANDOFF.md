@@ -1,6 +1,26 @@
 # DI Rescue — Handoff Codex/Devin
 
-Última actualización documental: 2026-07-30.
+Última actualización documental: 2026-07-31.
+
+## Preparación build Release y validación AU — 2026-07-31
+
+- Tarea: compilar el plugin en Release, instalar el `.component` en `~/Library/Audio/Plug-Ins/Components/`, refrescar la caché de Audio Units y validar con `auval` para dejarlo listo para Logic Pro X.
+- Commit base: `3b41386 fix: strengthen memory ordering for atomic operations`.
+- Archivos consultados: `PROTOTYPE_BUILD.md`, `HANDOFF.md`, `CMakeLists.txt`.
+- Cambios en esta sesión: ningún cambio de código; el repositorio ya tenía el fix de memory ordering commiteado.
+- Comandos ejecutados y resultados:
+  - `cmake --build build --config Release --parallel` → **BUILD SUCCEEDED**.
+  - `cp -R "build/DIRescue_artefacts/Release/AU/DI Rescue.component" ~/Library/Audio/Plug-Ins/Components/` → OK.
+  - `killall -9 AudioComponentRegistrar` → OK (refresca caché de Audio Units).
+  - `auval -v aufx DiRs Pdrv` → **AU VALIDATION SUCCEEDED**.
+- Limitaciones:
+  - El build es `x86_64`, coherente con el entorno documentado. Si la máquina de Logic es Apple Silicon nativo sin Rosetta, hará falta recompilar para `arm64`.
+  - No se ha podido abrir Logic Pro X para confirmar la carga real.
+- Pruebas pendientes:
+  - Carga real en Logic Pro X.
+  - Verificación de persistencia visual de `Instrument` al cerrar y reabrir el plugin.
+- Cambios sin commit: `PROTOTYPE_BUILD.md`.
+- Próxima acción única: abrir Logic Pro X, insertar DI Rescue en una pista y confirmar carga y persistencia del selector de instrumento.
 
 ## Corrección de persistencia del parámetro Instrument — 2026-07-30
 

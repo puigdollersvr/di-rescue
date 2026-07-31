@@ -77,6 +77,7 @@ ctest -C Debug --output-on-failure
 - Release build: **OK** (`cmake --build build --config Release --parallel`).
 - `auval`: **PASS** (`auval -v aufx DiRs Pdrv` tras copiar el `DI Rescue.component` Release a `~/Library/Audio/Plug-Ins/Components/` y reiniciar `AudioComponentRegistrar`).
 - `ctest` (Debug): **PASS** (`1/1 Test #1: DspSmoke ... Passed`).
+- Re-validado 2026-07-31: build Release OK, `auval` PASS, componente instalado en `~/Library/Audio/Plug-Ins/Components/`, caché AU refrescada.
 - Carga en Logic: pendiente.
 - Limitaciones: el entorno detectado es `x86_64` Intel, mientras que el alcance del prototipo prioriza Apple Silicon. El build actual se hizo nativo sobre esta máquina; si se necesita un binario Apple Silicon se deberá compilar en el hardware correspondiente.
 
